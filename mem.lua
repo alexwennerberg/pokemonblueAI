@@ -5,7 +5,7 @@ local memoryNames = {
 	----player
 	player_x_coord = 0xD362,
 	player_y_coord = 0xD361,
-	player_move_countdown = 0xD528,
+	player_move_direction = 0xD528,
 	movement_disabled = 0xCFC4,
 	--counts down from 3
 	----pokemon

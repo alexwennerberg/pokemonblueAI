@@ -1,12 +1,13 @@
 require "util"
 require "battle"
 require "movement"
+require "map"
 
 function main()
-     movement.walk("up")
-     movement.interact_object()
+    movement.walk("up")
+    movement.interact_object()
  end
 
 main()
 
---cd81: tilemap backup i think?
+--write dependencies 
