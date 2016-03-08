@@ -8,4 +8,7 @@ function random_walking()
 end
 
 --map.initialize_map()
-print(map.generate_raw_tile_table())
+while 1 do
+	print(map.generate_tile_table())
+	util.skipframes(100)
+end
