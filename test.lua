@@ -1,14 +1,18 @@
 require "movement"
+require "ai"
+require 'busted.runner'()
 
-function random_walking()
-	table = {'up', 'down', 'left', 'right'}
-	while 1 do
-		movement.walk(table[math.random(4)])
-	end
+print("hello world")
+
+function foo()
+	return true
 end
 
---map.initialize_map()
-while 1 do
-	print(map.generate_tile_table())
-	util.skipframes(100)
-end
+describe("a test", function()
+	it("tests some assertions", function()
+		assert.is_true(true)
+		assert.True(foo())
+		assert.are.equal(1,1)
+		assert.has.errors(function() error("this will fail") end)
+	end)
+end)

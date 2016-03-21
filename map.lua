@@ -44,7 +44,7 @@ tile_data = {
 		WATR = {5020,2020,2084}, --water
 		TREE = {6162}, -- tree
 		COMP = {},
-		LEDG = {5455,5555,5552}, --add ledges. this info is in the second (currently ignored) row
+		LEDG = {5455,5555,5552}, --ledges
 	},
 	{--tileset 1
 		WALK = {101,1819}, --walkable
@@ -233,6 +233,10 @@ function initialize_map()
 	end
 end
 
+function print_map()
+	print(map)
+end
+
 function update_map(old_tile_table)
 	local temp = generate_tile_table()
 	result = compare_tile_tables(old_tile_table, temp)
@@ -260,7 +264,6 @@ function update_map(old_tile_table)
 		end
 	end
 	print(x_current, y_current)
-	print(temp)
 end
 
 function compare_tile_tables(old, new)
