@@ -1,8 +1,14 @@
+--run in terminal
 require "movement"
 require "ai"
-require 'busted.runner'()
 
-print("hello world")
+
+
+
+--[[require 'busted.runner'()
+
+
+
 
 function foo()
 	return true
@@ -15,4 +21,4 @@ describe("a test", function()
 		assert.are.equal(1,1)
 		assert.has.errors(function() error("this will fail") end)
 	end)
-end)
+end)]]
