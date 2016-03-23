@@ -1,6 +1,6 @@
 module("ai", package.seeall)
 
-function check_if_open(map, startx, starty) --funciton that checks if a given coord in a closed region
+function check_if_open(map, startx, starty) --funciton that checks if a given coord in an open region
 	was_here = {}
 	correct_path = {}
 	map_to_check = {} 
@@ -40,5 +40,3 @@ function recursive_solve(x, y) --i copied this from https://en.wikipedia.org/wik
 	end
 	return false
 end
-
---learn unit testing!

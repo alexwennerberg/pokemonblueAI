@@ -34,7 +34,7 @@ require "mem"
 	22: "Cinnabar Mansion/Power Plant etc"
 	23: "Indigo Plateau"]]
 
-tile_data = {
+TILE_DATA = {
 	{ --tileset 0
 		WALK = {4444,4403,8282,5757,5735,3535,6060,9191}, --walkable
 		NWLK = {8687,5859,2323,2425,2122,2626,2393,9223,2679,7826,1818,2156,5625,
@@ -205,6 +205,7 @@ tile_data = {
 	},
 }
 
+--CONSTANTS
 PLAYER_OFFSET = 4 --distance from 1,1
 SCREEN_HEIGHT = 9
 SCREEN_WIDTH = 10
@@ -215,11 +216,13 @@ MAP_Y_BUFFER = 20
 x_current = MAP_X_BUFFER+1
 y_current = MAP_Y_BUFFER+1
 
+--MAPS
 map = {}
+last_tile_table = {} --what the tile table looked like last time update_map() was called
 
 
 function initialize_map()
-	local temp = generate_tile_table()
+	local current_tile_table = generate_tile_table()
 	for i=1,2*MAP_Y_BUFFER+SCREEN_HEIGHT do
 		map[i] = {}
 		for j=1,2*MAP_X_BUFFER+SCREEN_WIDTH do
@@ -228,39 +231,41 @@ function initialize_map()
 	end
 	for i=1,SCREEN_HEIGHT do
 		for j=1,SCREEN_WIDTH do
-			map[MAP_Y_BUFFER+i][MAP_X_BUFFER+j] = temp[i][j]
+			map[MAP_Y_BUFFER+i][MAP_X_BUFFER+j] = current_tile_table[i][j]
 		end
 	end
+	last_tile_table = generate_tile_table()
 end
 
 function print_map()
 	print(map)
 end
 
-function update_map(old_tile_table)
-	local temp = generate_tile_table()
-	result = compare_tile_tables(old_tile_table, temp)
+function update_map()
+	local current_tile_table = generate_tile_table()
+	result = compare_tile_tables(last_tile_table, current_tile_table)
+	last_tile_table = generate_tile_table()
 	print("moved", result)
 	if result == 'same' then print('same')
 	elseif result == 'up' then 
 		y_current = y_current - 1
 		for i=1,SCREEN_WIDTH do
-			map[y_current][x_current+i-1] = temp[1][i]
+			map[y_current][x_current+i-1] = current_tile_table[1][i]
 		end
 	elseif result == 'down' then 
 		y_current = y_current + 1
 		for i=1,SCREEN_WIDTH do
-			map[y_current+SCREEN_HEIGHT-1][x_current+i-1] = temp[SCREEN_HEIGHT][i]
+			map[y_current+SCREEN_HEIGHT-1][x_current+i-1] = current_tile_table[SCREEN_HEIGHT][i]
 		end
 	elseif result == 'right' then 
 		x_current = x_current + 1
 		for i=1,SCREEN_HEIGHT do
-			map[y_current+i-1][x_current+SCREEN_WIDTH-1] = temp[i][SCREEN_WIDTH]
+			map[y_current+i-1][x_current+SCREEN_WIDTH-1] = current_tile_table[i][SCREEN_WIDTH]
 		end
 	elseif result == 'left' then 
 		x_current = x_current - 1
 		for i=1,SCREEN_HEIGHT do
-			map[y_current+i-1][x_current] = temp[i][1]
+			map[y_current+i-1][x_current] = current_tile_table[i][1]
 		end
 	end
 	print(x_current, y_current)
@@ -364,7 +369,7 @@ function find_tile_value(x,y)
 end
 
 function convert_tile(tile_value)
-	bank = tile_data[mem.value('current_tileset')+1]
+	bank = TILE_DATA[mem.value('current_tileset')+1]
 	for k,v in pairs(bank) do
 		for kk,vv in pairs(v) do
 			if vv == tile_value then return k end

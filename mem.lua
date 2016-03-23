@@ -1,6 +1,6 @@
 module("mem", package.seeall)
 
-local memoryNames = {
+local memory_names = {
 	current_tileset = 0xD367,
 	----player
 	player_x_coord = 0xD362,
@@ -8,27 +8,41 @@ local memoryNames = {
 	player_move_direction = 0xD528,
 	movement_disabled = 0xCFC4,
 	--counts down from 3
-	----pokemon
+	--pokemon
 	pokemon_1_level = 0xD18C,
 	pokemon_2_level = 0xD1B8,
 	pokemon_3_level = 0xD1E4,
-  	pokemon_4_level = 0xD210,
-    pokemon_5_level = 0xD23C,
-  	pokemon_6_leve1 = 0xD268,
-  	number_pokemon = 0xD163,
-  	--battle
-  	battle_type = 0xD057, -- 1 is wild 2 is trainer -1 is lost battle
+	pokemon_4_level = 0xD210,
+  pokemon_5_level = 0xD23C,
+	pokemon_6_leve1 = 0xD268,
+	number_pokemon = 0xD163,
+	--battle
+	battle_type = 0xD057, -- 1 is wild 2 is trainer -1 is lost battle
 }
 
 function value(key)
-	return memory.readbyte(memoryNames[key])
+	return memory.readbyte(memory_names[key])
 end
 
-function getmoney()
+function get_money()
   return memory.readbyte(0xD349) + memory.readbyte(0xD348)*100
 end
 
-function pkmnhealth(num)
+function battling()
+  if value('battle_type') > 0 then
+    return true
+  end
+  return false
+end
+
+function menu_open() --DOES NOT WORK CORRECTLY. ONLY CHECKS RESTRICTED MOVEMENT.
+  if memory.readbyte(0xCFC4) == 1 then
+    return true
+  else return false
+  end
+end
+
+function pkmn_health(num)
   if num == 1 then
     return memory.readbyte(0xD16D) / memory.readbyte(0xD18E)
   elseif num == 2 then
@@ -42,13 +56,5 @@ function pkmnhealth(num)
   elseif num == 6 then
     return memory.readbyte(0xD249) / memory.readbyte(0xD26A)
   end
-  end
+end
 
-function menuopen()
---returns a boolean representative of whether a 
---menu is open
-  if memory.readbyte(0xCFC4) == 1 then
-    return true
-  else return false
-end
-end
