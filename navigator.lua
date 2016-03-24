@@ -8,7 +8,7 @@ require "map"
 function walk(direction)
     util.button(direction, 0, 4)
     util.skipframes(6)
-    print(find_events()) --DON'T DO THIS IF BATTLE STARTED OR IF SOMETHING INTERRUPTED? THIS ONLY WORKS IF NO MENUS COVER THE SCREEN!!
+    --print(find_events()) --DON'T DO THIS IF BATTLE STARTED OR IF SOMETHING INTERRUPTED? THIS ONLY WORKS IF NO MENUS COVER THE SCREEN!!
     map.update_map()
     util.skipframes(6)
 end

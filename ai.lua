@@ -1,6 +1,11 @@
 module("ai", package.seeall)
+require "map"
 
-function check_if_open(map, startx, starty) --funciton that checks if a given coord in an open region
+function return_path()
+	return find_path_out(map.get_map(), map.get_current_coords())
+end
+
+function find_path_out(map, startx, starty) --finds a path to something new. returns false if not possible
 	was_here = {}
 	correct_path = {}
 	map_to_check = {} 
@@ -14,28 +19,32 @@ function check_if_open(map, startx, starty) --funciton that checks if a given co
 			map_to_check[key][subkey] = map[key][subkey] --copies input map
 		end
 	end
-	return recursive_solve(startx, starty)
+	if not recursive_solve(startx, starty) then return false
+	else return correct_path end
 end
 
 function recursive_solve(x, y) --i copied this from https://en.wikipedia.org/wiki/Maze_solving_algorithm
 	print('doing recursive solve', x, y)
-	if map_to_check[x][y] == 'X' then return true end
-	if map_to_check[x][y] == 'NWLK' or was_here[x][y] then return false end
-	was_here[x][y] = true
+	if map_to_check[y][x] == 'X' then return true end
+	if map_to_check[y][x] == 'NWLK' or 
+	   map_to_check[y][x] == 'WATR' or 
+	   map_to_check[y][x] == 'LEDG' or
+	   map_to_check[y][x] == 'WARP' or was_here[y][x] then return false end --here is where nuance gets added
+	was_here[y][x] = true
 	if recursive_solve(x-1, y) then
-		--correct_path[x][y] = true;
+		correct_path[y][x] = 'left';
 		return true
 	end
 	if recursive_solve(x+1, y) then
-		--correct_path[x][y] = true;
+		correct_path[y][x] = 'right';
 		return true
 	end
 	if recursive_solve(x, y-1) then
-		--correct_path[x][y] = true;
+		correct_path[y][x] = 'up';
 		return true
 	end
 	if recursive_solve(x, y+1) then
-		--correct_path[x][y] = true;
+		correct_path[y][x] = 'down';
 		return true
 	end
 	return false

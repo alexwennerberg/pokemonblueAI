@@ -206,13 +206,13 @@ TILE_DATA = {
 }
 
 --CONSTANTS
-PLAYER_OFFSET = 4 --distance from 1,1
+PLAYER_OFFSET = 4 --distance from 1,1 to center (where sprite is)
 SCREEN_HEIGHT = 9
 SCREEN_WIDTH = 10
 BASE = 0xc3a0+0x14
 
-MAP_X_BUFFER = 20
-MAP_Y_BUFFER = 20
+MAP_X_BUFFER = 40
+MAP_Y_BUFFER = 40
 x_current = MAP_X_BUFFER+1
 y_current = MAP_Y_BUFFER+1
 
@@ -220,6 +220,13 @@ y_current = MAP_Y_BUFFER+1
 map = {}
 last_tile_table = {} --what the tile table looked like last time update_map() was called
 
+function get_current_coords()
+	return x_current+PLAYER_OFFSET, y_current+PLAYER_OFFSET
+end
+
+function get_map()
+	return map
+end
 
 function initialize_map()
 	local current_tile_table = generate_tile_table()
