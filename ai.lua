@@ -29,6 +29,7 @@ function recursive_solve(x, y) --i copied this from https://en.wikipedia.org/wik
 	if map_to_check[y][x] == 'NWLK' or 
 	   map_to_check[y][x] == 'WATR' or 
 	   map_to_check[y][x] == 'LEDG' or
+	   map_to_check[y][x] == 'TREE' or
 	   map_to_check[y][x] == 'WARP' or was_here[y][x] then return false end --here is where nuance gets added
 	was_here[y][x] = true
 	if recursive_solve(x-1, y) then

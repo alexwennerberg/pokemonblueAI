@@ -1,6 +1,8 @@
 module("battle", package.seeall)
 require "util"
 
-function battler()
-
+function complete_battle()
+	while mem.battling() do
+		util.button("A", 5)
+	end
 end

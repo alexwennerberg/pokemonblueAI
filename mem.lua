@@ -17,7 +17,10 @@ local memory_names = {
 	pokemon_6_leve1 = 0xD268,
 	number_pokemon = 0xD163,
 	--battle
-	battle_type = 0xD057, -- 1 is wild 2 is trainer -1 is lost battle
+	battle_type = 0xD057,
+  menu_y = 0xCC24,
+  menu_x = 0xCC25,
+  menu_item = 0xCC26
 }
 
 function value(key)
