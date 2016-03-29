@@ -9,7 +9,9 @@ function walk(direction)
     util.button(direction, 0, 4)
     util.skipframes(6)
     if find_events() == 'battle' then
-      battle.complete_battle()
+      if battle.complete_battle() == 'fainted'
+        then map.just_fainted()
+      end
     end 
     map.update_map()
     util.skipframes(6)

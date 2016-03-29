@@ -7,6 +7,10 @@ require "ai"
 function main()
   print(map.generate_tile_table())
 	map.initialize_map()
+  navigate_around()
+end
+
+function navigate_around()
   while 1 do
     follow_this_path = ai.return_path()
     --print(follow_this_path)

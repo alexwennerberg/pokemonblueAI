@@ -211,14 +211,15 @@ SCREEN_HEIGHT = 9
 SCREEN_WIDTH = 10
 BASE = 0xc3a0+0x14
 
-MAP_X_BUFFER = 40
-MAP_Y_BUFFER = 40
+MAP_X_BUFFER = 90
+MAP_Y_BUFFER = 90
 x_current = MAP_X_BUFFER+1
 y_current = MAP_Y_BUFFER+1
 
 --MAPS
 map = {}
 last_tile_table = {} --what the tile table looked like last time update_map() was called
+fainted = false
 
 function get_current_coords()
 	return x_current+PLAYER_OFFSET, y_current+PLAYER_OFFSET
@@ -226,6 +227,10 @@ end
 
 function get_map()
 	return map
+end
+
+function just_fainted() --set fainted to true
+	fainted = true
 end
 
 function initialize_map()
@@ -252,6 +257,12 @@ function update_map()
 	local current_tile_table = generate_tile_table()
 	result = compare_tile_tables(last_tile_table, current_tile_table)
 	last_tile_table = generate_tile_table()
+	if fainted then --only works if you start in front of the house now
+		x_current = MAP_X_BUFFER + 1
+		y_current = MAP_Y_BUFFER + 1
+		print(fainted)
+		fainted = false
+	end
 	print("moved", result)
 	if result == 'same' then print('same')
 	elseif result == 'up' then 

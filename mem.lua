@@ -17,11 +17,21 @@ local memory_names = {
 	pokemon_6_leve1 = 0xD268,
 	number_pokemon = 0xD163,
 	--battle
-	battle_type = 0xD057,
+  pokemon_1_hp_byte_1 = 0xD015,
+  pokemon_1_hp_byte_2 = 0xD016,
+	battle_type = 0xD057, --also 255 if battle lost
   menu_y = 0xCC24,
   menu_x = 0xCC25,
   menu_item = 0xCC26
 }
+
+function check_blackout() --return true if you just lost a battle 
+  if value('battle_type') == 255 then
+    print("BLACKED OUT")
+    return true
+  end
+  return false
+end
 
 function value(key)
 	return memory.readbyte(memory_names[key])
@@ -32,7 +42,7 @@ function get_money()
 end
 
 function battling()
-  if value('battle_type') > 0 then
+  if value('battle_type') > 0 and value('battle_type') ~= 255 then
     return true
   end
   return false
