@@ -7,6 +7,7 @@ local memory_names = {
 	player_y_coord = 0xD361,
 	player_move_direction = 0xD528,
 	movement_disabled = 0xCFC4,
+  warp_info = 0xd736,
 	--counts down from 3
 	--pokemon
 	pokemon_1_level = 0xD18C,
@@ -31,6 +32,14 @@ function check_blackout() --return true if you just lost a battle
     return true
   end
   return false
+end
+
+function leaving_room()
+  if value('warp_info') == 4 then
+    return true
+  else
+    return false
+  end
 end
 
 function value(key)

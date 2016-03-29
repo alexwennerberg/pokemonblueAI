@@ -34,6 +34,28 @@ require "mem"
 	22: "Cinnabar Mansion/Power Plant etc"
 	23: "Indigo Plateau"]]
 
+--CONSTANTS
+PLAYER_OFFSET = 4 --distance from 1,1 to center (where sprite is)
+SCREEN_HEIGHT = 9
+SCREEN_WIDTH = 10
+BASE = 0xc3a0+0x14
+
+MAP_X_BUFFER = 10
+MAP_Y_BUFFER = 10
+x_current = MAP_X_BUFFER+1
+y_current = MAP_Y_BUFFER+1
+
+--MAPS
+world = {}
+last_tile_table = {} --what the tile table looked like last time update_map() was called
+fainted = false
+current_map = 1
+
+warp_data = {--warp[map_number][y_value][x_value] = {destination zone, # of visits}
+}
+
+BLACKOUT_POINTS = {} --where you go when you black out
+
 TILE_DATA = {
 	{ --tileset 0
 		WALK = {4444,4403,8282,5757,5735,3535,6060,9191}, --walkable
@@ -49,7 +71,8 @@ TILE_DATA = {
 	{--tileset 1
 		WALK = {101,1819}, --walkable
 		NWLK = {1616,0,5253,4849,5051,2223,5455,5657,6058,5859}, --nowalkable
-		WARP = {2829,2020}, --warp. 2020 is doormat
+		WARP = {2829},
+		DMAT = {2020}, --warp. 2020 is doormat
 		WATR = {}, --water
 		TREE = {}, -- tree
 		LEDG = {}, --add ledges. this info is in the second (currently ignored) row
@@ -57,7 +80,7 @@ TILE_DATA = {
 	{--pokemart
 		WALK = {2627,1727}, --walkable
 		NWLK = {2329,6263,0,8081,8183,2524,4040,1641,8485,8587}, --nowalkable
-		WARP = {2828}, --warp.
+		DMAT = {2828}, --warp.
 		SHOP = {3031}, --shop here
 		TREE = {}, -- tree
 		LEDG = {}, --add ledges. this info is in the second (currently ignored) row
@@ -79,10 +102,10 @@ TILE_DATA = {
 		TREE = {}, --tree
 		COMP = {5051}, --pc computer
 	},	
-	{--tileset 5
+	{--tileset 5 "GYM 1"
 		WALK = {1717}, --walkable
 		NWLK = {1515,1616,8283,1314,2930,7857,5779,5455,8595,5757}, --nowalkable
-		WARP = {2222}, --warp
+		DMAT = {2222}, --warp
 		WATR = {}, --water
 		TREE = {}, -- tree
 		COMP = {},
@@ -91,7 +114,7 @@ TILE_DATA = {
 	{--tileset 6 "pokemon center" WRONG 
 		WALK = {1727}, --walkable
 		NWLK = {0,1631,4074,5051,4849,1641,}, --nowalkable
-		WARP = {2828}, --warp
+		DMAT = {2828}, --warp
 		WATR = {}, --water
 		TREE = {}, -- tree
 		COMP = {},
@@ -110,7 +133,8 @@ TILE_DATA = {
 		WALK = {101,1819}, --walkable
 		NWLK = {1616,0,5253,4849,5051,2223,5455,5657,6058,5859,1415,6162,5252,3031,
 				5447,4757,809,2425,8889,9091,7071}, --nowalkable
-		WARP = {2829,2020}, --warp. 2020 is doormat
+		WARP = {2829},
+		DMAT = {2020}, --warp. 2020 is doormat
 		WATR = {}, --water
 		TREE = {}, -- tree
 		LEDG = {}, --add ledges. this info is in the second (currently ignored) row
@@ -118,7 +142,8 @@ TILE_DATA = {
 	{--tileset 9
 		WALK = {117}, --walkable
 		NWLK = {1616,2122,7474,5434,5051,2324,5942,5354}, --nowalkable
-		WARP = {2020,5492}, --warp. 2020 is doormat
+		WARP = {5492},
+		DMAT = {2020}, --warp. 2020 is doormat
 		TREE = {}, --tree
 		COMP = {}, --pc computer
 	},	
@@ -205,28 +230,14 @@ TILE_DATA = {
 	},
 }
 
---CONSTANTS
-PLAYER_OFFSET = 4 --distance from 1,1 to center (where sprite is)
-SCREEN_HEIGHT = 9
-SCREEN_WIDTH = 10
-BASE = 0xc3a0+0x14
 
-MAP_X_BUFFER = 90
-MAP_Y_BUFFER = 90
-x_current = MAP_X_BUFFER+1
-y_current = MAP_Y_BUFFER+1
-
---MAPS
-map = {}
-last_tile_table = {} --what the tile table looked like last time update_map() was called
-fainted = false
 
 function get_current_coords()
 	return x_current+PLAYER_OFFSET, y_current+PLAYER_OFFSET
 end
 
 function get_map()
-	return map
+	return world[current_map]
 end
 
 function just_fainted() --set fainted to true
@@ -234,26 +245,69 @@ function just_fainted() --set fainted to true
 end
 
 function initialize_map()
+	current_map = table.maxn(world) + 1
+	world[current_map] = {}
 	local current_tile_table = generate_tile_table()
 	for i=1,2*MAP_Y_BUFFER+SCREEN_HEIGHT do
-		map[i] = {}
+		world[current_map][i] = {}
 		for j=1,2*MAP_X_BUFFER+SCREEN_WIDTH do
-			map[i][j] = 'X'
+			world[current_map][i][j] = 'X'
 		end
 	end
 	for i=1,SCREEN_HEIGHT do
 		for j=1,SCREEN_WIDTH do
-			map[MAP_Y_BUFFER+i][MAP_X_BUFFER+j] = current_tile_table[i][j]
+			world[current_map][MAP_Y_BUFFER+i][MAP_X_BUFFER+j] = current_tile_table[i][j]
 		end
 	end
+	x_current = MAP_X_BUFFER+1
+	y_current = MAP_Y_BUFFER+1
 	last_tile_table = generate_tile_table()
 end
 
-function print_map()
-	print(map)
+function print_world()
+	print(world[current_map])
 end
 
-function update_map()
+function get_current_tile() --debugger
+	return world[current_map][y_current][x_current]
+end
+
+function update_map(input_direction)
+	if world[current_map][y_current+PLAYER_OFFSET][x_current+PLAYER_OFFSET] == 'WARP' then
+		print("ooh i warped!")
+		util.skipframes(70)
+		new_map = true
+		for key,value in pairs(warp_data) do
+			if value[1][1] == current_map and value[1][2] == y_current and value[1][3] == x_current then
+				value[3] = value[3] + 1
+				new_map = false
+				current_map = value[2][1]
+				y_current = value[2][2]
+				x_current = value[2][3]
+			end
+		end
+		if new_map then
+			temp_previous_map = current_map
+			temp_previous_x = x_current
+			temp_previous_y = y_current
+			print("making new map...")
+			initialize_map()		
+			warp_data[table.maxn(warp_data)+1] = {{temp_previous_map,temp_previous_y,temp_previous_x},{current_map,y_current,x_current},1}
+			warp_data[table.maxn(warp_data)+1] = {{current_map,y_current+1,x_current},{temp_previous_map,temp_previous_y+1,temp_previous_x}, 1}
+			print(warp_data)
+			print(current_map)
+		end
+	end
+	if input_direction == 'up' and world[current_map][y_current+PLAYER_OFFSET-1][x_current+PLAYER_OFFSET] == 'WARP' then
+		y_current = y_current - 1
+		return
+	end
+	if input_direction == 'down' and world[current_map][y_current+PLAYER_OFFSET+1][x_current+PLAYER_OFFSET] == 'WARP' then
+		y_current = y_current + 1
+		print("doorstep down")
+		return
+	end
+	
 	local current_tile_table = generate_tile_table()
 	result = compare_tile_tables(last_tile_table, current_tile_table)
 	last_tile_table = generate_tile_table()
@@ -268,26 +322,27 @@ function update_map()
 	elseif result == 'up' then 
 		y_current = y_current - 1
 		for i=1,SCREEN_WIDTH do
-			map[y_current][x_current+i-1] = current_tile_table[1][i]
+			world[current_map][y_current][x_current+i-1] = current_tile_table[1][i]
 		end
 	elseif result == 'down' then 
 		y_current = y_current + 1
 		for i=1,SCREEN_WIDTH do
-			map[y_current+SCREEN_HEIGHT-1][x_current+i-1] = current_tile_table[SCREEN_HEIGHT][i]
+			world[current_map][y_current+SCREEN_HEIGHT-1][x_current+i-1] = current_tile_table[SCREEN_HEIGHT][i]
 		end
 	elseif result == 'right' then 
 		x_current = x_current + 1
 		for i=1,SCREEN_HEIGHT do
-			map[y_current+i-1][x_current+SCREEN_WIDTH-1] = current_tile_table[i][SCREEN_WIDTH]
+			world[current_map][y_current+i-1][x_current+SCREEN_WIDTH-1] = current_tile_table[i][SCREEN_WIDTH]
 		end
 	elseif result == 'left' then 
 		x_current = x_current - 1
 		for i=1,SCREEN_HEIGHT do
-			map[y_current+i-1][x_current] = current_tile_table[i][1]
+			world[current_map][y_current+i-1][x_current] = current_tile_table[i][1]
 		end
 	end
-	print(x_current, y_current)
+	print(current_map, x_current, y_current)
 end
+
 
 function compare_tile_tables(old, new)
 	result = 'same'
@@ -363,6 +418,13 @@ function generate_tile_table()
 		tile_table[i] = {}
 		for j=1,SCREEN_WIDTH do
 			tile_table[i][j] = convert_tile(find_tile_value(j,i))
+		end
+	end
+	for i=1,SCREEN_HEIGHT-1 do
+		for j=1,SCREEN_WIDTH do
+			if tile_table[i][j] == 'DMAT'
+				then tile_table[i+1][j] = 'WARP'
+			end
 		end
 	end
 	return tile_table

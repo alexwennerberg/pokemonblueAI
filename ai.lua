@@ -24,7 +24,7 @@ function find_path_out(map, startx, starty) --finds a path to something new. ret
 end
 
 function recursive_solve(x, y) --i copied this from https://en.wikipedia.org/wiki/Maze_solving_algorithm
-	print('doing recursive solve', x, y)
+	--print('doing recursive solve', x, y)
 	if map_to_check[y][x] == 'X' then return true end
 	if map_to_check[y][x] == 'NWLK' or 
 	   map_to_check[y][x] == 'WATR' or 

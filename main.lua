@@ -7,7 +7,9 @@ require "ai"
 function main()
   print(map.generate_tile_table())
 	map.initialize_map()
-  navigate_around()
+  print(map.get_current_tile())
+  --navigate_around()
+  dumb_walker()
 end
 
 function navigate_around()
@@ -30,6 +32,17 @@ end
 
 function test_battle()
   battle.complete_battle()
+end
+
+function dumb_walker()
+  navigator.walk("up")
+  navigator.walk("up")
+  navigator.walk("up")
+  navigator.walk("down")
+  navigator.walk("down")
+  navigator.walk("down")
+  navigator.walk("down")
+  navigator.walk("down")
 end
 
 main()

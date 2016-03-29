@@ -8,12 +8,14 @@ require "map"
 function walk(direction)
     util.button(direction, 0, 4)
     util.skipframes(6)
-    if find_events() == 'battle' then
+    if mem.battling() then
       if battle.complete_battle() == 'fainted'
         then map.just_fainted()
       end
+    elseif mem.menu_open() then
+      interact_object()
     end 
-    map.update_map()
+    map.update_map(direction)
     util.skipframes(6)
 end
 
@@ -28,12 +30,9 @@ function find_events()--is there something happening other than walking around?
 end
 
 function interact_object()
-    while(mem.value("movement_disabled") == 0) do
-      util.button("A")
-    end
-    while(mem.value("movement_disabled") == 1) do
+  while mem.menu_open() do
       util.button("A")
       util.skipframes(100)
-    end
+  end
 end
 
