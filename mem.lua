@@ -2,6 +2,9 @@ module("mem", package.seeall)
 
 local memory_names = {
 	current_tileset = 0xD367,
+  current_map = 0xD35E,
+  map_height_blocks = 0xD368,
+  map_width_blocks = 0xD369,
 	----player
 	player_x_coord = 0xD362,
 	player_y_coord = 0xD361,
@@ -25,6 +28,26 @@ local memory_names = {
   menu_x = 0xCC25,
   menu_item = 0xCC26
 }
+
+function get_map()
+  return value('current_map')
+end
+
+function get_map_width() --tiles
+  return 4*value('map_width_blocks')
+end
+
+function get_map_height() --tiles
+  return 4*value('map_height_blocks')
+end
+
+function get_x_coord()
+  return value('player_x_coord')
+end
+
+function get_y_coord()
+  return value('player_y_coord')
+end
 
 function check_blackout() --return true if you just lost a battle 
   if value('battle_type') == 255 then

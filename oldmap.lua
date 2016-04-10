@@ -1,4 +1,4 @@
-module("map", package.seeall)
+module("oldmap", package.seeall)
 
 require "util"
 require "mem"
@@ -40,18 +40,21 @@ SCREEN_HEIGHT = 9
 SCREEN_WIDTH = 10
 BASE = 0xc3a0+0x14
 
-MAP_X_BUFFER = 5
-MAP_Y_BUFFER = 5
-x_current = mem.get_x_coord()
-y_current = mem.get_y_coord()
-map_current = mem.get_map()
+MAP_X_BUFFER = 100
+MAP_Y_BUFFER = 100
+x_current = MAP_X_BUFFER+1
+y_current = MAP_Y_BUFFER+1
 
 --MAPS
 world = {}
 last_tile_table = {} --what the tile table looked like last time update_map() was called
+fainted = false
+current_map = 1
 
 warp_data = {--warp[map_number][y_value][x_value] = {destination zone, # of visits}
 }
+
+BLACKOUT_POINTS = {} --where you go when you black out
 
 TILE_DATA = {
 	{ --tileset 0
@@ -227,12 +230,14 @@ TILE_DATA = {
 	},
 }
 
+
+
 function get_current_coords()
 	return x_current+PLAYER_OFFSET, y_current+PLAYER_OFFSET
 end
 
 function get_map()
-	return world[map_current]
+	return world[current_map]
 end
 
 function just_fainted() --set fainted to true
@@ -240,77 +245,168 @@ function just_fainted() --set fainted to true
 end
 
 function initialize_map()
-	x_current = mem.get_x_coord()
-	y_current = mem.get_y_coord()
-	map_current = mem.get_map()
-	world[map_current] = {}
+	current_map = table.maxn(world) + 1
+	world[current_map] = {}
 	local current_tile_table = generate_tile_table()
-	for i=1,mem.get_map_height() do
-		world[map_current][i] = {}
-		for j=1,mem.get_map_width() do
-			world[map_current][i][j] = 'X'
+	for i=1,2*MAP_Y_BUFFER+SCREEN_HEIGHT do
+		world[current_map][i] = {}
+		for j=1,2*MAP_X_BUFFER+SCREEN_WIDTH do
+			world[current_map][i][j] = 'X'
 		end
 	end
 	for i=1,SCREEN_HEIGHT do
-		for j=1,SCREEN_WIDTH do			
-				world[map_current][y_current+i-1][x_current+j-1] = current_tile_table[i][j]
+		for j=1,SCREEN_WIDTH do
+			world[current_map][MAP_Y_BUFFER+i][MAP_X_BUFFER+j] = current_tile_table[i][j]
 		end
 	end
+	x_current = MAP_X_BUFFER+1
+	y_current = MAP_Y_BUFFER+1
 	last_tile_table = generate_tile_table()
 end
 
 function print_world()
-	print(world[map_current])
+	print(world[current_map])
 end
 
 function get_current_tile() --debugger
-	return world[map_current][y_current][x_current]
+	return world[current_map][y_current][x_current]
 end
 
-function update_map()
-	local current_tile_table = generate_tile_table()
-	if mem.get_x_coord() ~= x_current or mem.get_y_coord() ~= y_current then
-		if mem.get_x_coord() == x_current + 1 then
-			update_coords()
-			for i=1,SCREEN_HEIGHT do
-				world[map_current][y_current+i-1][x_current+SCREEN_WIDTH-1] = current_tile_table[i][SCREEN_WIDTH]
-			end
-		elseif mem.get_x_coord() == x_current - 1 then
-			update_coords()
-			for i=1,SCREEN_HEIGHT do
-				world[map_current][y_current+i-1][x_current] = current_tile_table[i][1]
-			end
-		elseif mem.get_y_coord() == y_current + 1 then
-			update_coords()
-			for i=1,SCREEN_WIDTH do
-				world[map_current][y_current+SCREEN_HEIGHT-1][x_current+i-1] = current_tile_table[SCREEN_HEIGHT][i]
-			end
-		elseif mem.get_y_coord() == y_current - 1 then
-			update_coords()
-			for i=1,SCREEN_WIDTH do
-				world[map_current][y_current][x_current+i-1] = current_tile_table[1][i]
+function update_map(input_direction)
+	if world[current_map][y_current+PLAYER_OFFSET][x_current+PLAYER_OFFSET] == 'WARP' then
+		print("ooh i warped!")
+		util.skipframes(70)
+		new_map = true
+		for key,value in pairs(warp_data) do
+			if value[1][1] == current_map and value[1][2] == y_current and value[1][3] == x_current then
+				value[3] = value[3] + 1
+				new_map = false
+				current_map = value[2][1]
+				y_current = value[2][2]
+				x_current = value[2][3]
 			end
 		end
+		if new_map then
+			temp_previous_map = current_map
+			temp_previous_x = x_current
+			temp_previous_y = y_current
+			print("making new map...")
+			initialize_map()		
+			warp_data[table.maxn(warp_data)+1] = {{temp_previous_map,temp_previous_y,temp_previous_x},{current_map,y_current,x_current},1}
+			warp_data[table.maxn(warp_data)+1] = {{current_map,y_current+1,x_current},{temp_previous_map,temp_previous_y+1,temp_previous_x}, 1}
+			print(warp_data)
+			print(current_map)
+		end
 	end
-	update_coords()
-	print(x_current, y_current)
-	print(world[map_current][y_current+PLAYER_OFFSET][x_current+PLAYER_OFFSET])
-	if world[map_current][y_current+PLAYER_OFFSET][x_current+PLAYER_OFFSET] ~= 'WALK' then
-		print("ERROR, MAP IS MESSED UP")
+	if input_direction == 'up' and world[current_map][y_current+PLAYER_OFFSET-1][x_current+PLAYER_OFFSET] == 'WARP' then
+		y_current = y_current - 1
+		return
 	end
+	if input_direction == 'down' and world[current_map][y_current+PLAYER_OFFSET+1][x_current+PLAYER_OFFSET] == 'WARP' then
+		y_current = y_current + 1
+		print("doorstep down")
+		return
+	end
+	
+	local current_tile_table = generate_tile_table()
+	result = compare_tile_tables(last_tile_table, current_tile_table)
+	last_tile_table = generate_tile_table()
+	if fainted then --only works if you start in front of the house now
+		x_current = MAP_X_BUFFER + 1
+		y_current = MAP_Y_BUFFER + 1
+		print(fainted)
+		fainted = false
+	end
+	print("moved", result)
+	if result == 'same' then print('same')
+	elseif result == 'up' then 
+		y_current = y_current - 1
+		for i=1,SCREEN_WIDTH do
+			world[current_map][y_current][x_current+i-1] = current_tile_table[1][i]
+		end
+	elseif result == 'down' then 
+		y_current = y_current + 1
+		for i=1,SCREEN_WIDTH do
+			world[current_map][y_current+SCREEN_HEIGHT-1][x_current+i-1] = current_tile_table[SCREEN_HEIGHT][i]
+		end
+	elseif result == 'right' then 
+		x_current = x_current + 1
+		for i=1,SCREEN_HEIGHT do
+			world[current_map][y_current+i-1][x_current+SCREEN_WIDTH-1] = current_tile_table[i][SCREEN_WIDTH]
+		end
+	elseif result == 'left' then 
+		x_current = x_current - 1
+		for i=1,SCREEN_HEIGHT do
+			world[current_map][y_current+i-1][x_current] = current_tile_table[i][1]
+		end
+	end
+	print(current_map, x_current, y_current)
 end
 
-function update_coords()
-	map_current = mem.get_map()
-	x_current = mem.get_x_coord()
-	y_current = mem.get_y_coord()
-end
 
+function compare_tile_tables(old, new)
+	result = 'same'
+	for i=1,SCREEN_HEIGHT do
+		if not table_compare(old[i], new[i]) then
+			result = 'not same'
+		end
+	end
+	if result == 'same' then return result
+	elseif check_up(old,new) then
+		return 'up'
+	elseif check_down(old,new) then
+		return 'down'
+	elseif check_right(old,new) then
+		return 'right'
+	elseif check_left(old,new) then
+		return 'left'
+	else return 'crap' end
+end	
 
 function table_compare(a,b) --compares two tables of the same length, return bool
 	for key,value in pairs(a) do
 		if b[key] ~= value then
 			return false
+		end
+	end
+	return true
+end
+
+function check_up(old,new)
+	for i=2,SCREEN_HEIGHT do
+		if not table_compare(new[i],old[i-1]) then
+			return false
+		end
+	end
+	return true
+end
+
+function check_down(old,new)
+	for i=2,SCREEN_HEIGHT do
+		if not table_compare(new[i-1],old[i]) then
+			return false
+		end
+	end
+	return true
+end
+
+function check_right(old,new)--wrong
+	for i=1,SCREEN_HEIGHT do
+		for j=2,SCREEN_WIDTH do
+			if old[i][j] ~= new[i][j-1] then
+				return false
+			end
+		end
+	end
+	return true
+end
+
+function check_left(old,new)--wrong
+	for i=1,SCREEN_HEIGHT do
+		for j=2,SCREEN_WIDTH do
+			if old[i][j-1] ~= new[i][j] then
+				return false
+			end
 		end
 	end
 	return true

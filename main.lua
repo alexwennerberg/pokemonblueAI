@@ -5,8 +5,10 @@ require "map"
 require "ai"
 
 function main()
+  print(mem.value('current_tileset'))
   print(map.generate_tile_table())
-	map.initialize_map()
+  print(map.generate_raw_tile_table())
+
   print(map.get_current_tile())
   --navigate_around()
   dumb_walker()
@@ -35,14 +37,21 @@ function test_battle()
 end
 
 function dumb_walker()
+  map.initialize_map() 
   navigator.walk("up")
   navigator.walk("up")
   navigator.walk("up")
+  navigator.walk("up")
+  navigator.walk("right")
   navigator.walk("down")
   navigator.walk("down")
   navigator.walk("down")
   navigator.walk("down")
-  navigator.walk("down")
+  navigator.walk("left")
 end
 
-main()
+function test()
+  dumb_walker()
+end
+
+navigate_around()

@@ -7,7 +7,7 @@ require "map"
 
 function walk(direction)
     util.button(direction, 0, 4)
-    util.skipframes(6)
+    util.skipframes(14)
     if mem.battling() then
       if battle.complete_battle() == 'fainted'
         then map.just_fainted()
@@ -15,8 +15,7 @@ function walk(direction)
     elseif mem.menu_open() then
       interact_object()
     end 
-    map.update_map(direction)
-    util.skipframes(6)
+    map.update_map()
 end
 
 function find_events()--is there something happening other than walking around?
