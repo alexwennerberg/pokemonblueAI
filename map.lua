@@ -48,7 +48,6 @@ map_current = mem.get_map()
 
 --MAPS
 world = {}
-last_tile_table = {} --what the tile table looked like last time update_map() was called
 
 warp_data = {--warp[map_number][y_value][x_value] = {destination zone, # of visits}
 }
@@ -235,11 +234,11 @@ function get_map()
 	return world[map_current]
 end
 
-function just_fainted() --set fainted to true
-	fainted = true
+function get_world()
+	return world
 end
 
-function initialize_map()
+function initialize_world()
 	x_current = mem.get_x_coord()
 	y_current = mem.get_y_coord()
 	map_current = mem.get_map()
@@ -267,7 +266,20 @@ function get_current_tile() --debugger
 	return world[map_current][y_current][x_current]
 end
 
-function update_map()
+function update_position()
+	if mem.get_map() == map_current then
+		update_view_of_map()
+	else
+		update_map_number()
+	end
+	print(x_current, y_current)
+	current_tile_value = world[map_current][y_current+PLAYER_OFFSET][x_current+PLAYER_OFFSET]
+	if current_tile_valuue == 'NWLK' then
+		print("ERROR, MAP IS MESSED UP")
+	end
+end
+
+function update_view_of_map()
 	local current_tile_table = generate_tile_table()
 	if mem.get_x_coord() ~= x_current or mem.get_y_coord() ~= y_current then
 		if mem.get_x_coord() == x_current + 1 then
@@ -292,18 +304,38 @@ function update_map()
 			end
 		end
 	end
-	update_coords()
-	print(x_current, y_current)
-	print(world[map_current][y_current+PLAYER_OFFSET][x_current+PLAYER_OFFSET])
-	if world[map_current][y_current+PLAYER_OFFSET][x_current+PLAYER_OFFSET] ~= 'WALK' then
-		print("ERROR, MAP IS MESSED UP")
+	x_current = mem.get_x_coord()
+	y_current = mem.get_y_coord()
+end
+
+function update_map_number()
+	print("UPDATING MAP NUMBER...")
+	x_current = mem.get_x_coord()
+	y_current = mem.get_y_coord()
+	map_current = mem.get_map()
+	if world[map_current] ~= nil then
+		print("FAMILIAR MAP")
+	else
+		print("NEW MAP")
+		world[map_current] = {}
+		local current_tile_table = generate_tile_table()
+		for i=1,mem.get_map_height() do
+			world[map_current][i] = {}
+			for j=1,mem.get_map_width() do
+				world[map_current][i][j] = 'X'
+			end
+		end
+		for i=1,SCREEN_HEIGHT do
+			for j=1,SCREEN_WIDTH do			
+					world[map_current][y_current+i-1][x_current+j-1] = current_tile_table[i][j]
+			end
+		end
 	end
 end
 
 function update_coords()
 	map_current = mem.get_map()
-	x_current = mem.get_x_coord()
-	y_current = mem.get_y_coord()
+
 end
 
 

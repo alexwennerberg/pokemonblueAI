@@ -15,7 +15,7 @@ function walk(direction)
     elseif mem.menu_open() then
       interact_object()
     end 
-    map.update_map()
+    map.update_position()
 end
 
 function find_events()--is there something happening other than walking around?
