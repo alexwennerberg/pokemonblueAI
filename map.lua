@@ -310,6 +310,7 @@ end
 
 function update_map_number()
 	print("UPDATING MAP NUMBER...")
+	check_and_update_warp()
 	x_current = mem.get_x_coord()
 	y_current = mem.get_y_coord()
 	map_current = mem.get_map()
@@ -331,6 +332,18 @@ function update_map_number()
 			end
 		end
 	end
+end
+
+function check_and_update_warp()
+	string_of_warp_point = tostring(map_current) .. ' ' .. tostring(y_current) .. ' ' .. tostring(x_current)
+	if warp_data[string_of_warp_point] ~= nil then
+		warp_data[string_of_warp_point][2] = warp_data[string_of_warp_point][2] + 1
+	else
+		warp_data[string_of_warp_point] = {mem.get_map(), 1}
+	end
+	print("updated warp")
+	print(warp_data)
+
 end
 
 function update_coords()
