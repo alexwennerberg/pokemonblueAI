@@ -310,9 +310,9 @@ end
 
 function update_map_number()
 	print("UPDATING MAP NUMBER...")
-	check_and_update_warp()
 	x_current = mem.get_x_coord()
 	y_current = mem.get_y_coord()
+	check_and_update_warp()
 	map_current = mem.get_map()
 	if world[map_current] ~= nil then
 		print("FAMILIAR MAP")
