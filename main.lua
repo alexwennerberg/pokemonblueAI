@@ -6,26 +6,23 @@ require "ai"
 
 function main()
   --print(map.get_current_tile())
-  --navigate_around()
-  dumb_walker()
+  navigate_around()
 end
 
 function navigate_around()
-  while 1 do
-    follow_this_path = ai.return_path()
-    --print(follow_this_path)
-    x,y=map.get_current_coords()
-    counter = 1
-    while follow_this_path[y][x] do
-      navigator.walk(follow_this_path[y][x])
-      tempa,tempb = map.get_current_coords()
-      if tempa == x and tempb == y then counter = counter + 1 end ---stop if you're stuck
-      x,y=map.get_current_coords()
-      if counter == 10 then
-        break
-      end
+    map.initialize_world()
+	x,y=map.get_current_coords()
+    follow_this_path = ai.breadth_first_search(map.get_map(), {x, y}, {9,14})
+    print(follow_this_path)
+    stringified_coords = tostring(x) .. ' ' .. tostring(y)
+    while 1 do
+  	if follow_this_path[stringified_coords] ~= nil then
+		    navigator.walk(follow_this_path[stringified_coords])
+   	end
+	x,y = map.get_current_coords()
+	stringified_coords = tostring(x) .. ' ' .. tostring(y)
+
     end
-  end
 end
 
 function test_battle()

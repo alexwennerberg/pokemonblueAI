@@ -1,53 +1,4 @@
---module("ai", package.seeall)
---require "map"
-
-function return_path()
-	return find_path_out(map.get_map(), map.get_current_coords())
-end
-
-function find_path_out(map, startx, starty) --finds a path to something new. returns false if not possible
-	was_here = {}
-	correct_path = {}
-	map_to_check = {} 
-	for key,value in pairs(map) do
-		was_here[key] = {}
-		correct_path[key] = {}
-		map_to_check[key] = {}
-		for subkey,subvalue in pairs(value) do
-			was_here[key][subkey] = false
-			correct_path[key][subkey] = false
-			map_to_check[key][subkey] = map[key][subkey] --copies input map
-		end
-	end
-	if not recursive_solve(startx, starty) then return false
-	else return correct_path end
-end
-
-function recursive_solve(x, y) --i copied this from https://en.wikipedia.org/wiki/Maze_solving_algorithm
-	if map_to_check[y][x] == 'X' or map_to_check[y][x] == 'WARP' then return true end
-	if map_to_check[y][x] == 'NWLK' or 
-	   map_to_check[y][x] == 'WATR' or 
-	   map_to_check[y][x] == 'LEDG' or
-	   map_to_check[y][x] == 'TREE' or was_here[y][x] then return false end --here is where nuance gets added
-	was_here[y][x] = true
-	if recursive_solve(x-1, y) then
-		correct_path[y][x] = 'left';
-		return true
-	end
-	if recursive_solve(x+1, y) then
-		correct_path[y][x] = 'right';
-		return true
-	end
-	if recursive_solve(x, y-1) then
-		correct_path[y][x] = 'up';
-		return true
-	end
-	if recursive_solve(x, y+1) then
-		correct_path[y][x] = 'down';
-		return true
-	end
-	return false
-end
+module("ai", package.seeall)
 
 test_map = {
 		{'WALK', 'WALK', 'WALK'},
@@ -57,6 +8,7 @@ test_map = {
 
 function breadth_first_search(map, start, goal) -- from http://www.redblobgames.com/pathfinding/a-star/introduction.html
 	frontier = List.new()
+	print(map)
 	List.push(frontier, start)
 	came_from = {}
 	came_from[start] = nil
@@ -66,23 +18,29 @@ function breadth_first_search(map, start, goal) -- from http://www.redblobgames.
 		for _,next_space in pairs(neighbors) do
 			if not table.contains_pair(came_from,next_space) then
 				List.push(frontier, next_space)
-				came_from[next_space] = current
+				came_from[coordinate_to_string(next_space)] = current
 			end
 		end
 		
 	end
-	
+	print(came_from)
 	current[1] = goal[1]
 	current[2] = goal[2]
 	path = {current}
 	while current[1] ~= start[1] or current[2] ~= start[2] do
-		current = came_from[current]
+		print(current)
+		print(came_from[current])
+		current = came_from[coordinate_to_string(current)]
 		table.insert(path, current)
 	end
 	for _,element in pairs(path) do
 		print(element[1] .. ' ' .. element[2])
 	end
-	convert_path(path)	
+	return convert_path(path)	
+end
+
+function coordinate_to_string(coordinate)
+	return tostring(coordinate[1]) .. ' ' .. tostring(coordinate[2])
 end
 
 function convert_path(path) --i got confused on this so the variables may be whack. still works
@@ -90,10 +48,6 @@ function convert_path(path) --i got confused on this so the variables may be wha
 	print("converting...")
 	for i = #path, 1, -1 do
 		if i==1 then
-			print(converted_path["1 2"])
-			print(converted_path["1 1"])
-			print(converted_path["2 1"])
-			print(converted_path["3 1"])
 			return converted_path
 		end
 		step = path[i]
@@ -110,7 +64,6 @@ function convert_path(path) --i got confused on this so the variables may be wha
 			end
 		end
 	end
-	print(converted_path["1 2"])
 	return converted_path
 end
 
@@ -133,9 +86,8 @@ function table.contains(table, element)
 end
 
 function get_neighbors(map, node)
-	print('getting neighbors')
 	neighbor_table = {}
-	local unwalkables = {'NWLK'}
+	local unwalkables = {'NWLK', 'X'}
 	potential_neighbors = {right_of(node, map), left_of(node), above(node), below(node, map)}
 	for _,potential_neighbor in pairs(potential_neighbors) do
 		if potential_neighbor then
@@ -143,10 +95,6 @@ function get_neighbors(map, node)
 				table.insert(neighbor_table, potential_neighbor)
 			end
 		end
-	end
-
-	for _,element in pairs(neighbor_table) do
-		print(element[1] .. element[2])
 	end
 	return neighbor_table
 end
@@ -195,11 +143,11 @@ function List.push(list, value)
 end
 
 function List.pop(list)
-	local last = list.last
-	if list.first > last then error("list is empty") end
-	local value = list[last]
-	list[last] = nil
-	list.last = last - 1
+	local first = list.first
+	if first  > list.last then error("list is empty") end
+	local value = list[first]
+	list[first] = nil
+	list.first = first + 1
 	return value
 end
 
@@ -209,4 +157,4 @@ function List.empty(list)
 	end
 end
 
-breadth_first_search(test_map, {1,2}, {3,2}) 
+breadth_first_search(test_map, {1,2}, {3,2})
