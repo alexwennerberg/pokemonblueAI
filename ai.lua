@@ -85,8 +85,33 @@ function breadth_first_search(map, start, goal) -- from http://www.redblobgames.
 	convert_path(path)	
 end
 
-function convert_path(path)
-	--reverse it
+function convert_path(path) --i got confused on this so the variables may be whack. still works
+	converted_path = {}
+	print("converting...")
+	for i = #path, 1, -1 do
+		if i==1 then
+			print(converted_path["1 2"])
+			print(converted_path["1 1"])
+			print(converted_path["2 1"])
+			print(converted_path["3 1"])
+			return converted_path
+		end
+		step = path[i]
+		previous_step = path[i-1]
+		directions = {left = right_of(previous_step),
+				right = left_of(previous_step), 
+				down = above(previous_step), 
+				up = below(previous_step)}
+		for key,value in pairs(directions) do
+			if value then
+				if value[1] == step[1] and value[2] == step[2] then
+					converted_path[tostring(getX(step)) .. " " .. tostring(getY(step))] = key
+				end
+			end
+		end
+	end
+	print(converted_path["1 2"])
+	return converted_path
 end
 
 function table.contains_pair(table, element)
@@ -111,7 +136,7 @@ function get_neighbors(map, node)
 	print('getting neighbors')
 	neighbor_table = {}
 	local unwalkables = {'NWLK'}
-	potential_neighbors = {right_of(map, node), left_of(node), above(node), below(map, node)}
+	potential_neighbors = {right_of(node, map), left_of(node), above(node), below(node, map)}
 	for _,potential_neighbor in pairs(potential_neighbors) do
 		if potential_neighbor then
 			if not table.contains(unwalkables, map[getY(potential_neighbor)][getX(potential_neighbor)]) then
@@ -126,8 +151,10 @@ function get_neighbors(map, node)
 	return neighbor_table
 end
 
-function right_of(map, node)
-	if getX(node) + 1 > #map[1] then return false end 
+function right_of(node, map)
+	if map ~= nil then
+		if getX(node) + 1 > #map[1] then return false end 
+	end
 	return {getX(node) + 1, getY(node)}
 end
 
@@ -141,8 +168,10 @@ function above(node)
 	return {getX(node), getY(node) - 1}
 end
 
-function below(map, node)
-	if getY(node) + 1 > #map then return false end
+function below(node, map)
+	if map ~= nil then
+		if getY(node) + 1 > #map then return false end
+	end
 	return {getX(node), getY(node) + 1}
 end
 
