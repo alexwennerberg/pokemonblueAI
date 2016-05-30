@@ -42,8 +42,6 @@ BASE = 0xc3a0+0x14
 
 MAP_X_BUFFER = 5
 MAP_Y_BUFFER = 5
-x_current = mem.get_x_coord()
-y_current = mem.get_y_coord()
 map_current = mem.get_map()
 
 --MAPS
@@ -230,58 +228,32 @@ function get_current_coords()
 	return x_current+PLAYER_OFFSET, y_current+PLAYER_OFFSET
 end
 
+function get_warp_data()
+	return warp_data
+end
+
 function get_map()
 	return world[map_current]
 end
 
 function get_map_pathfinding() --offset by 1
-	--look for people
-	return_map = {}
-	for i=1,2+#world[map_current] do
-		return_map[i] = {}
-		for j=1,2+#world[map_current][1] do
-			return_map[i][j] = 'X'
-		end
-	end
-	for i=2,#return_map-1 do
-		for j=2,#return_map[1]-1 do
-			return_map[i][j] = world[map_current][i-1][j-1]
-		end
-	end
-
-	for i=1,#return_map do --find warp points
-		if return_map[i][2] == 'WALK' then
-			return_map[i][1] = 'WARP'
-		end
-		if return_map[i][#return_map[1]-1] == 'WALK' then
-			return_map[i][#return_map[1]] = 'WARP'
-		end
-	end
-	--[[for i=1,#return_map[1] do
-		if return_map[2][i] == 'WALK' then
-			return_map[1][i] = 'WARP'
-		end
-		if return_map[#return_map-1][i] == WALK then
-			return_map[#return_map][i] = 'WARP'
-		end
-
-	end]]
-
-	return return_map
+	return get_map()
 end
 
 function get_current_coords_pathfinding()
-	return x_current+PLAYER_OFFSET+1, y_current+PLAYER_OFFSET+1
+	return get_current_coords()
 end
-
 
 function get_world()
 	return world
 end
 
+function get_map_number()
+	return map_current
+end
+
 function initialize_world()
-	x_current = mem.get_x_coord()
-	y_current = mem.get_y_coord()
+	update_x_and_y()
 	map_current = mem.get_map()
 	world[map_current] = {}
 	local current_tile_table = generate_tile_table()
@@ -308,6 +280,8 @@ function get_current_tile() --debugger
 end
 
 function update_position()
+	x_previous = x_current
+	y_previous = y_current
 	if mem.get_map() == map_current then
 		update_view_of_map()
 	else
@@ -320,7 +294,7 @@ function update_position()
 	end
 end
 
-function update_view_of_map()
+function update_view_of_map() --refactor
 	local current_tile_table = generate_tile_table()
 	if mem.get_x_coord() ~= x_current or mem.get_y_coord() ~= y_current then
 		if mem.get_x_coord() == x_current + 1 then
@@ -345,14 +319,17 @@ function update_view_of_map()
 			end
 		end
 	end
+	update_x_and_y()
+end
+
+function update_x_and_y()
 	x_current = mem.get_x_coord()
 	y_current = mem.get_y_coord()
 end
 
 function update_map_number()
 	print("UPDATING MAP NUMBER...")
-	x_current = mem.get_x_coord()
-	y_current = mem.get_y_coord()
+	update_x_and_y()
 	check_and_update_warp()
 	map_current = mem.get_map()
 	if world[map_current] ~= nil then
@@ -376,7 +353,10 @@ function update_map_number()
 end
 
 function check_and_update_warp()
-	string_of_warp_point = tostring(map_current) .. ' ' .. tostring(y_current) .. ' ' .. tostring(x_current)
+	print(x_previous, y_previous, x_current, y_current)
+	last_motion = mem.get_facing_direction()
+	warp_space = util.move_coordinate(x_previous, y_previous, last_motion)
+	string_of_warp_point = util.coordinate_to_string({map_current, warp_space[2]+PLAYER_OFFSET, warp_space[1]+PLAYER_OFFSET})
 	if warp_data[string_of_warp_point] ~= nil then
 		warp_data[string_of_warp_point][2] = warp_data[string_of_warp_point][2] + 1
 	else
@@ -389,9 +369,7 @@ end
 
 function update_coords()
 	map_current = mem.get_map()
-	x_current = mem.get_x_coord()
-	y_current = mem.get_y_coord()
-
+	update_x_and_y()
 end
 
 

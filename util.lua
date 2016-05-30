@@ -1,5 +1,10 @@
 module("util", package.seeall)
 
+--[[local direction_table = {right = {x+1,y},
+        left = {x-1, y},
+        up = {x,y-1},
+        down = {x,y+1}}]]
+
 function button(name, spacing, num) -- presses button and prints input
   local n, m
   if num ~= nil then n = num else n = 1 end
@@ -24,6 +29,55 @@ while i<frames do
   i = vba.framecount()-j;
   vba.frameadvance();
 end
+end
+
+function move_coordinate(coordinate_x, coordinate_y, direction)
+  local output_coordinate = {coordinate_x, coordinate_y}
+  if direction == 'right' then
+    output_coordinate[1] = output_coordinate[1] + 1
+  elseif direction == 'left' then
+    output_coordinate[1] = output_coordinate[1] - 1
+  elseif direction == 'down' then
+    output_coordinate[2] = output_coordinate[2] + 1
+  elseif direction == 'up' then
+    output_coordinate[2] = output_coordinate[2] - 1
+  end
+  return output_coordinate
+end
+
+function coordinates_to_direction(previous, current)
+  if current[1] == previous[1] - 1 then
+    if current[2] == previous[2] then
+     return 'right'
+    end
+  end
+  if current[1] == previous[1] + 1 then
+    if current[2] == previous[2] then
+      return 'left'
+    end
+  end
+  if current[2] == previous[2] + 1 then
+    if current[1] == previous[1] then
+      return 'down'
+    end
+  end
+  if current[2] == previous[2] - 1 then
+    if current[1] == previous[1] then
+      return 'up'
+    end
+  end
+  if current[2] == previous[2] and current[1] == previous[1] then 
+    return 'no_change'
+  end
+  return 'other_change'
+end
+
+function coordinate_to_string(coordinate)
+  if coordinate[3] ~= nil then
+    return tostring(coordinate[1]) .. ' ' .. tostring(coordinate[2]) .. ' ' .. tostring(coordinate[3])
+  else 
+    return tostring(coordinate[1]) .. ' ' .. tostring(coordinate[2]) 
+  end
 end
 
 function table.contains(table, element)

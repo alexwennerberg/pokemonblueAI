@@ -8,6 +8,7 @@ local memory_names = {
 	----player
 	player_x_coord = 0xD362,
 	player_y_coord = 0xD361,
+  player_facing_direction = 0xC109,
 	player_move_direction = 0xD528,
 	movement_disabled = 0xCFC4,
   warp_info = 0xd736,
@@ -28,6 +29,18 @@ local memory_names = {
   menu_x = 0xCC25,
   menu_item = 0xCC26
 }
+
+function get_facing_direction()
+  if value('player_facing_direction') == 0 then
+    return 'down'
+  elseif value('player_facing_direction') == 4 then
+    return 'up'
+  elseif value('player_facing_direction') == 8 then
+    return 'left'
+  elseif value('player_facing_direction') == 12 then
+    return 'right'
+  end
+end
 
 function get_map()
   return value('current_map')

@@ -12,7 +12,7 @@ end
 function navigate_around()
 	map.initialize_world()
 	x,y = map.get_current_coords_pathfinding()
-	while 1 do follow_this_path = ai.breadth_first_search(map.get_map_pathfinding(), {x, y})
+	while 1 do follow_this_path = ai.breadth_first_search(map.get_map_pathfinding(), {x, y}, 'X')
 		print(x .. y)
 		print(follow_this_path)
 		follow_path(follow_this_path)
@@ -23,6 +23,8 @@ end
 function follow_path(path)
  	while 1 do
 		x,y = map.get_current_coords_pathfinding()
+		map_temp = map.get_map_number()
+		old_map_locations = map.get_map_pathfinding()
 		stringified_coords = tostring(x) .. ' ' .. tostring(y)
   		if follow_this_path[stringified_coords] ~= nil then
 			navigator.walk(follow_this_path[stringified_coords])
@@ -33,6 +35,7 @@ function follow_path(path)
 	end
 	vba.frameadvance()
 end
+
 
 function test_battle()
   battle.complete_battle()
