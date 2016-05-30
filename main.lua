@@ -10,19 +10,28 @@ function main()
 end
 
 function navigate_around()
-    map.initialize_world()
-	x,y=map.get_current_coords()
-    follow_this_path = ai.breadth_first_search(map.get_map(), {x, y}, {9,14})
-    print(follow_this_path)
-    stringified_coords = tostring(x) .. ' ' .. tostring(y)
-    while 1 do
-  	if follow_this_path[stringified_coords] ~= nil then
-		    navigator.walk(follow_this_path[stringified_coords])
-   	end
-	x,y = map.get_current_coords()
-	stringified_coords = tostring(x) .. ' ' .. tostring(y)
+	map.initialize_world()
+	x,y = map.get_current_coords_pathfinding()
+	while 1 do follow_this_path = ai.breadth_first_search(map.get_map_pathfinding(), {x, y})
+		print(x .. y)
+		print(follow_this_path)
+		follow_path(follow_this_path)
 
-    end
+	end
+end
+
+function follow_path(path)
+ 	while 1 do
+		x,y = map.get_current_coords_pathfinding()
+		stringified_coords = tostring(x) .. ' ' .. tostring(y)
+  		if follow_this_path[stringified_coords] ~= nil then
+			navigator.walk(follow_this_path[stringified_coords])
+   		end
+		xtemp,ytemp = map.get_current_coords_pathfinding()
+		if xtemp == x and ytemp == y then break --we arent moving
+		end
+	end
+	vba.frameadvance()
 end
 
 function test_battle()

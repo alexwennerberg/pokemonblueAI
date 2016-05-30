@@ -57,7 +57,7 @@ TILE_DATA = {
 		WALK = {4444,4403,8282,5757,5735,3535,6060,9191}, --walkable
 		NWLK = {8687,5859,2323,2425,2122,2626,2393,9223,2679,7826,1818,2156,5625,
 				8585,1534,3434,7575,7531,8081,1575,9018,1890,1575,7474,3039,3939,
-				1717,3636,3431,3602}, --nowalkable
+				1717,3636,3431,3602,1939,3653}, --nowalkable
 		WARP = {2728}, --warp
 		WATR = {5020,2020,2084}, --water
 		TREE = {6162}, -- tree
@@ -234,6 +234,47 @@ function get_map()
 	return world[map_current]
 end
 
+function get_map_pathfinding() --offset by 1
+	--look for people
+	return_map = {}
+	for i=1,2+#world[map_current] do
+		return_map[i] = {}
+		for j=1,2+#world[map_current][1] do
+			return_map[i][j] = 'X'
+		end
+	end
+	for i=2,#return_map-1 do
+		for j=2,#return_map[1]-1 do
+			return_map[i][j] = world[map_current][i-1][j-1]
+		end
+	end
+
+	for i=1,#return_map do --find warp points
+		if return_map[i][2] == 'WALK' then
+			return_map[i][1] = 'WARP'
+		end
+		if return_map[i][#return_map[1]-1] == 'WALK' then
+			return_map[i][#return_map[1]] = 'WARP'
+		end
+	end
+	--[[for i=1,#return_map[1] do
+		if return_map[2][i] == 'WALK' then
+			return_map[1][i] = 'WARP'
+		end
+		if return_map[#return_map-1][i] == WALK then
+			return_map[#return_map][i] = 'WARP'
+		end
+
+	end]]
+
+	return return_map
+end
+
+function get_current_coords_pathfinding()
+	return x_current+PLAYER_OFFSET+1, y_current+PLAYER_OFFSET+1
+end
+
+
 function get_world()
 	return world
 end
@@ -348,6 +389,8 @@ end
 
 function update_coords()
 	map_current = mem.get_map()
+	x_current = mem.get_x_coord()
+	y_current = mem.get_y_coord()
 
 end
 

@@ -42,11 +42,11 @@ function get_map_height() --tiles
 end
 
 function get_x_coord()
-  return value('player_x_coord')
+  return value('player_x_coord')+1
 end
 
 function get_y_coord()
-  return value('player_y_coord')
+  return value('player_y_coord')+1
 end
 
 function check_blackout() --return true if you just lost a battle 

@@ -6,33 +6,30 @@ test_map = {
 		{'WALK', 'NWLK', 'WALK'},
 	}
 
-function breadth_first_search(map, start, goal) -- from http://www.redblobgames.com/pathfinding/a-star/introduction.html
+function breadth_first_search(map, start) -- from http://www.redblobgames.com/pathfinding/a-star/introduction.html
 	frontier = List.new()
-	print(map)
 	List.push(frontier, start)
 	came_from = {}
 	came_from[start] = nil
 	while not List.empty(frontier) do
 		current = List.pop(frontier)
+		if map[getY(current)][getX(current)] == 'X' then break end
 		neighbors = get_neighbors(map, current)
 		for _,next_space in pairs(neighbors) do
-			if not table.contains_pair(came_from,next_space) then
+			if came_from[coordinate_to_string(next_space)] == nil then
 				List.push(frontier, next_space)
 				came_from[coordinate_to_string(next_space)] = current
 			end
 		end
 		
 	end
-	print(came_from)
-	current[1] = goal[1]
-	current[2] = goal[2]
 	path = {current}
+	print('getting path...')
 	while current[1] ~= start[1] or current[2] ~= start[2] do
-		print(current)
-		print(came_from[current])
 		current = came_from[coordinate_to_string(current)]
 		table.insert(path, current)
 	end
+	print('printing path...')
 	for _,element in pairs(path) do
 		print(element[1] .. ' ' .. element[2])
 	end
@@ -87,7 +84,7 @@ end
 
 function get_neighbors(map, node)
 	neighbor_table = {}
-	local unwalkables = {'NWLK', 'X'}
+	local unwalkables = {'NWLK', 'WATR', 'LEDG', 'TREE'}
 	potential_neighbors = {right_of(node, map), left_of(node), above(node), below(node, map)}
 	for _,potential_neighbor in pairs(potential_neighbors) do
 		if potential_neighbor then
