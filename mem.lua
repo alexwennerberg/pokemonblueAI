@@ -27,8 +27,17 @@ local memory_names = {
 	battle_type = 0xD057, --also 255 if battle lost
   menu_y = 0xCC24,
   menu_x = 0xCC25,
-  menu_item = 0xCC26
+  menu_item = 0xCC26,
+  --game
+  gym_badge_1 = 0xD356, --brock
 }
+
+function have_brock_badge()
+  if value('gym_badge_1') == 1 then
+    return true
+  end
+  return false
+end
 
 function get_facing_direction()
   if value('player_facing_direction') == 0 then

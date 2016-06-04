@@ -7,10 +7,13 @@ function breadth_first_search(in_map, start, goal) -- from http://www.redblobgam
 	List.push(frontier, start)
 	came_from = {}
 	came_from[start] = nil
+	found_solution = false
 	while not List.empty(frontier) do
 		current = List.pop(frontier)
-		if in_map[getY(current)][getX(current)] == goal
-			then break end
+		if in_map[getY(current)][getX(current)] == goal then 
+			found_solution = true
+			print("found a solution!") 
+			break end
 		neighbors = get_neighbors(in_map, current)
 		for _,next_space in pairs(neighbors) do
 			if came_from[util.coordinate_to_string(next_space)] == nil then
@@ -78,12 +81,12 @@ end
 
 function get_neighbors(in_map, node)
 	neighbor_table = {}
-	local unwalkables = {'NWLK', 'WATR', 'LEDG', 'TREE', 'WARP'}
+	local unwalkables = {'NWLK', 'WATR', 'LEDG', 'TREE'}
 	potential_neighbors = {right_of(node, in_map), left_of(node), above(node), below(node, in_map)}
 	for _,potential_neighbor in pairs(potential_neighbors) do
 		if potential_neighbor then
 			if not table.contains(unwalkables, in_map[getY(potential_neighbor)][getX(potential_neighbor)]) then
-				if not check_for_warp(potential_neighbor) then
+				if not check_for_warp(potential_neighbor, in_map) then
 					table.insert(neighbor_table, potential_neighbor)
 				end
 			end
@@ -92,7 +95,10 @@ function get_neighbors(in_map, node)
 	return neighbor_table
 end
 
-function check_for_warp(coordinate)
+function check_for_warp(coordinate, in_map)
+	if in_map[getY(coordinate)][getX(coordinate)] == "WARP" and found_solution then
+		return true
+	end
 	warp_table = map.get_warp_data()
 	map_number = map.get_map_number()
 	if warp_table[map_number .. ' ' .. tostring(coordinate[2]) .. ' ' .. tostring(coordinate[1])] ~= nil then

@@ -5,12 +5,13 @@ require "map"
 require "ai"
 
 function main()
-  --print(map.get_current_tile())
-  navigate_around()
+	map.initialize_world()
+	while not mem.have_brock_badge() do
+		navigate_around()
+	end
 end
 
 function navigate_around()
-	map.initialize_world()
 	x,y = map.get_current_coords_pathfinding()
 	while 1 do follow_this_path = ai.breadth_first_search(map.get_map_pathfinding(), {x, y}, 'X')
 		print(x .. y)
