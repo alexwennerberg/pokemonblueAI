@@ -45,6 +45,14 @@ function move_coordinate(coordinate_x, coordinate_y, direction)
   return output_coordinate
 end
 
+function reverse(direction)
+  if direction == 'right' then return 'left'
+  elseif direction == 'left' then return 'right'
+  elseif direction == 'up' then return 'down'
+  elseif direction == 'down' then return 'up'
+  end
+end
+
 function coordinates_to_direction(previous, current)
   if current[1] == previous[1] - 1 then
     if current[2] == previous[2] then

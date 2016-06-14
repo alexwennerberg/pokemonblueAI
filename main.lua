@@ -6,6 +6,7 @@ require "ai"
 
 function main()
 	map.initialize_world()
+  print(map.generate_tile_table())
 	while not mem.have_brock_badge() do
 		navigate_around()
 	end
@@ -13,11 +14,17 @@ end
 
 function navigate_around()
 	x,y = map.get_current_coords_pathfinding()
-	while 1 do follow_this_path = ai.breadth_first_search(map.get_map_pathfinding(), {x, y}, 'X')
+	while 1 do 
+    follow_this_path = ai.breadth_first_search(map.get_map_pathfinding(), {x, y}, 'X')
 		print(x .. y)
 		print(follow_this_path)
-		follow_path(follow_this_path)
-
+    if ai.has_solution() then
+  		follow_path(follow_this_path)
+    else
+      print('searching for warp')
+      follow_this_path = ai.breadth_first_search(map.get_map_pathfinding(), {x, y}, 'WARP')
+      follow_path(follow_this_path)
+    end
 	end
 end
 

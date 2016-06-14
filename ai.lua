@@ -2,6 +2,17 @@ module("ai", package.seeall)
 
 require "map"
 
+found_solution = false
+
+function has_solution()
+	return found_solution
+end
+
+function pair_compare(a, b)
+	if a[1] == b[1] and a[2] == b[2] then return true end
+	return false
+end
+
 function breadth_first_search(in_map, start, goal) -- from http://www.redblobgames.com/pathfinding/a-star/introduction.html
 	frontier = List.new()
 	List.push(frontier, start)
@@ -10,10 +21,14 @@ function breadth_first_search(in_map, start, goal) -- from http://www.redblobgam
 	found_solution = false
 	while not List.empty(frontier) do
 		current = List.pop(frontier)
-		if in_map[getY(current)][getX(current)] == goal then 
-			found_solution = true
-			print("found a solution!") 
-			break end
+		if not pair_compare(current, start) then
+			if in_map[getY(current)][getX(current)] == 'X'
+			or unvisited_warp(current, in_map) then 
+				found_solution = true
+				print("found a solution!") 
+				break 
+			end
+		end
 		neighbors = get_neighbors(in_map, current)
 		for _,next_space in pairs(neighbors) do
 			if came_from[util.coordinate_to_string(next_space)] == nil then
@@ -35,6 +50,17 @@ function breadth_first_search(in_map, start, goal) -- from http://www.redblobgam
 	end
 	return convert_path(path)	
 end
+
+function unvisited_warp(coordinate, in_map)
+	if in_map[getY(coordinate)][getX(coordinate)] == "WARP" then
+		warp_table = map.get_warp_data()
+		map_number = map.get_map_number()
+		if warp_table[map_number .. ' ' .. tostring(coordinate[2]) .. ' ' .. tostring(coordinate[1])] == nil then
+			return true
+		end
+	end
+	return false
+end	
 
 
 function convert_path(path) --i got confused on this so the variables may be whack. still works

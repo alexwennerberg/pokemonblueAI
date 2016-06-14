@@ -329,9 +329,9 @@ end
 
 function update_map_number()
 	print("UPDATING MAP NUMBER...")
+	util.skipframes(100)
 	update_x_and_y()
 	check_and_update_warp()
-	map_current = mem.get_map()
 	if world[map_current] ~= nil then
 		print("FAMILIAR MAP")
 	else
@@ -355,17 +355,32 @@ end
 function check_and_update_warp()
 	print(x_previous, y_previous, x_current, y_current)
 	last_motion = mem.get_facing_direction()
+	map_previous = map_current
+	map_current = mem.get_map()
 	warp_space = util.move_coordinate(x_previous, y_previous, last_motion)
-	string_of_warp_point = util.coordinate_to_string({map_current, warp_space[2]+PLAYER_OFFSET, warp_space[1]+PLAYER_OFFSET})
-	if warp_data[string_of_warp_point] ~= nil then
-		warp_data[string_of_warp_point][2] = warp_data[string_of_warp_point][2] + 1
-	else
-		warp_data[string_of_warp_point] = {mem.get_map(), 1}
-	end
+	string_of_warp_point = util.coordinate_to_string({map_previous, warp_space[2]+PLAYER_OFFSET, warp_space[1]+PLAYER_OFFSET})
+	add_warp_point(string_of_warp_point, map_current)
+	increment_warp_point(string_of_warp_point)
+	
+	reverse_warp_space = util.move_coordinate(x_current, y_current, util.reverse(last_motion))
+	string_of_reverse_point = util.coordinate_to_string({map_current, reverse_warp_space[2]+PLAYER_OFFSET, reverse_warp_space[1]+PLAYER_OFFSET})
+	print("reverse point is", string_of_reverse_point)
+	add_warp_point(string_of_reverse_point, map_previous)
 	print("updated warp")
 	print(warp_data)
-
 end
+
+function add_warp_point(warp_key, to_map)
+	if warp_data[warp_key] == nil then
+		warp_data[warp_key] = {to_map, 0}
+	end
+end
+
+function increment_warp_point(warp_key)
+	warp_data[warp_key][2] = warp_data[warp_key][2] + 1
+end
+
+
 
 function update_coords()
 	map_current = mem.get_map()
@@ -392,8 +407,10 @@ function generate_tile_table()
 	end
 	for i=1,SCREEN_HEIGHT-1 do
 		for j=1,SCREEN_WIDTH do
-			if tile_table[i][j] == 'DMAT'
-				then tile_table[i+1][j] = 'WARP'
+			if tile_table[i][j] == 'DMAT' then 
+				tile_table[i+1][j] = 'WARP'
+				tile_table[i][j+1] = 'WALK'
+				break
 			end
 		end
 	end
