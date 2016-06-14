@@ -44,6 +44,9 @@ MAP_X_BUFFER = 5
 MAP_Y_BUFFER = 5
 map_current = mem.get_map()
 
+--flags
+sprite_ahead = false
+
 --MAPS
 world = {}
 
@@ -223,6 +226,9 @@ TILE_DATA = {
 		LEDG = {}, --add ledges. this info is in the second (currently ignored) row
 	},
 }
+function set_sprite_ahead()
+	sprite_ahead = true
+end
 
 function get_current_coords()
 	return x_current+PLAYER_OFFSET, y_current+PLAYER_OFFSET
@@ -237,7 +243,20 @@ function get_map()
 end
 
 function get_map_pathfinding() --offset by 1
-	return get_map()
+	pathfinding_map = get_map()
+	if sprite_ahead then
+		blocked_coordinate = util.move_coordinate(x_current+PLAYER_OFFSET, y_current+PLAYER_OFFSET, mem.get_facing_direction())
+		print("sprite at", blocked_coordinate)
+		pathfinding_map[blocked_coordinate[2]][blocked_coordinate[1]] = 'SPRT'
+		sprite_ahead = false
+	end
+	for key,value in pairs(warp_data) do
+		coordinate_to_check = util.string_to_coordinate(key)
+		if coordinate_to_check[1] == map_current then
+			pathfinding_map[coordinate_to_check[2]][coordinate_to_check[3]] = 'WARP'
+		end
+	end
+	return pathfinding_map
 end
 
 function get_current_coords_pathfinding()
@@ -252,6 +271,11 @@ function get_map_number()
 	return map_current
 end
 
+function find_npc_sprites()
+
+
+end
+
 function initialize_world()
 	update_x_and_y()
 	map_current = mem.get_map()
@@ -260,7 +284,7 @@ function initialize_world()
 	for i=1,mem.get_map_height() do
 		world[map_current][i] = {}
 		for j=1,mem.get_map_width() do
-			world[map_current][i][j] = 'X'
+			world[map_current][i][j] = 'XXXX'
 		end
 	end
 	for i=1,SCREEN_HEIGHT do
@@ -287,7 +311,7 @@ function update_position()
 	else
 		update_map_number()
 	end
-	print(x_current, y_current)
+	--print(x_current, y_current)
 	current_tile_value = world[map_current][y_current+PLAYER_OFFSET][x_current+PLAYER_OFFSET]
 	if current_tile_valuue == 'NWLK' then
 		print("ERROR, MAP IS MESSED UP")
@@ -341,7 +365,7 @@ function update_map_number()
 		for i=1,mem.get_map_height() do
 			world[map_current][i] = {}
 			for j=1,mem.get_map_width() do
-				world[map_current][i][j] = 'X'
+				world[map_current][i][j] = 'XXXX'
 			end
 		end
 		for i=1,SCREEN_HEIGHT do

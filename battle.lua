@@ -19,7 +19,10 @@ end
 
 function select_move(move_number)
 	select_fight()
+	n = 10
 	while mem.get_current_menu_item() ~= move_number do
+		n = n-1
+		if n == 0 then break end
 		util.button("down", button_spacing)
 	end
 	util.button("A", button_spacing)

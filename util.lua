@@ -88,6 +88,15 @@ function coordinate_to_string(coordinate)
   end
 end
 
+function string_to_coordinate(string)--returns {z,y,x}
+  coordinate = {}
+  converted_coordinate = {}
+  for word in string:gmatch("%w+") do table.insert(coordinate, word) end
+  for i = 1,#coordinate do
+    converted_coordinate[i] = tonumber(coordinate[i]) end
+  return converted_coordinate
+end
+
 function table.contains(table, element)
   
   for _, value in pairs(table) do

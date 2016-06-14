@@ -3,6 +3,7 @@ module("ai", package.seeall)
 require "map"
 
 found_solution = false
+sprite_ahead = false
 
 function has_solution()
 	return found_solution
@@ -19,17 +20,17 @@ function breadth_first_search(in_map, start, goal) -- from http://www.redblobgam
 	came_from = {}
 	came_from[start] = nil
 	found_solution = false
+	--print(in_map)
 	while not List.empty(frontier) do
 		current = List.pop(frontier)
 		if not pair_compare(current, start) then
-			if in_map[getY(current)][getX(current)] == 'X'
-			or unvisited_warp(current, in_map) then 
+			if in_map[getY(current)][getX(current)] == goal then 
 				found_solution = true
 				print("found a solution!") 
 				break 
 			end
 		end
-		neighbors = get_neighbors(in_map, current)
+		neighbors = get_neighbors(in_map, current, goal)
 		for _,next_space in pairs(neighbors) do
 			if came_from[util.coordinate_to_string(next_space)] == nil then
 				List.push(frontier, next_space)
@@ -39,14 +40,14 @@ function breadth_first_search(in_map, start, goal) -- from http://www.redblobgam
 		
 	end
 	path = {current}
-	print('getting path...')
+	--print('getting path...')
 	while current[1] ~= start[1] or current[2] ~= start[2] do
 		current = came_from[util.coordinate_to_string(current)]
 		table.insert(path, current)
 	end
-	print('printing path...')
+	--print('printing path...')
 	for _,element in pairs(path) do
-		print(element[1] .. ' ' .. element[2])
+		--print(element[1] .. ' ' .. element[2])
 	end
 	return convert_path(path)	
 end
@@ -55,7 +56,10 @@ function unvisited_warp(coordinate, in_map)
 	if in_map[getY(coordinate)][getX(coordinate)] == "WARP" then
 		warp_table = map.get_warp_data()
 		map_number = map.get_map_number()
-		if warp_table[map_number .. ' ' .. tostring(coordinate[2]) .. ' ' .. tostring(coordinate[1])] == nil then
+		print("warp table is", warp_table)
+		warp_ref_string = map_number .. ' ' .. tostring(coordinate[2]) .. ' ' .. tostring(coordinate[1])
+		if warp_table[warp_ref_string] == nil
+			or warp_table[warp_ref_string][2] == 0 then
 			return true
 		end
 	end
@@ -105,16 +109,18 @@ function table.contains(table, element)
 	return false
 end
 
-function get_neighbors(in_map, node)
+function get_neighbors(in_map, node, goal)
 	neighbor_table = {}
-	local unwalkables = {'NWLK', 'WATR', 'LEDG', 'TREE'}
+	local unwalkables = {'NWLK', 'WATR', 'LEDG', 'TREE', 'SPRT'}
+	if goal == 'XXXX' then 
+		table.insert(unwalkables, 'WARP')
+	end
+
 	potential_neighbors = {right_of(node, in_map), left_of(node), above(node), below(node, in_map)}
 	for _,potential_neighbor in pairs(potential_neighbors) do
 		if potential_neighbor then
 			if not table.contains(unwalkables, in_map[getY(potential_neighbor)][getX(potential_neighbor)]) then
-				if not check_for_warp(potential_neighbor, in_map) then
 					table.insert(neighbor_table, potential_neighbor)
-				end
 			end
 		end
 	end

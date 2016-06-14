@@ -15,8 +15,8 @@ end
 function navigate_around()
 	x,y = map.get_current_coords_pathfinding()
 	while 1 do 
-    follow_this_path = ai.breadth_first_search(map.get_map_pathfinding(), {x, y}, 'X')
-		print(x .. y)
+    follow_this_path = ai.breadth_first_search(map.get_map_pathfinding(), {x, y}, 'XXXX')
+		print("current coords", x .. y)
 		print(follow_this_path)
     if ai.has_solution() then
   		follow_path(follow_this_path)
@@ -34,12 +34,16 @@ function follow_path(path)
 		map_temp = map.get_map_number()
 		old_map_locations = map.get_map_pathfinding()
 		stringified_coords = tostring(x) .. ' ' .. tostring(y)
-  		if follow_this_path[stringified_coords] ~= nil then
-			navigator.walk(follow_this_path[stringified_coords])
-   		end
-		xtemp,ytemp = map.get_current_coords_pathfinding()
-		if xtemp == x and ytemp == y then break --we arent moving
-		end
+		if follow_this_path[stringified_coords] ~= nil then
+		  navigator.walk(follow_this_path[stringified_coords])
+      xtemp,ytemp = map.get_current_coords_pathfinding()
+      if xtemp == x and ytemp == y then 
+        map.set_sprite_ahead()
+        break --we arent moving
+      end
+    else
+      break
+    end
 	end
 	vba.frameadvance()
 end
@@ -76,6 +80,9 @@ end
 
 function test()
   dumb_walker()
+end
+
+function help_me_debug()
 end
 
 main()
