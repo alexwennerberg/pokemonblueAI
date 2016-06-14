@@ -83,8 +83,8 @@ TILE_DATA = {
 		LEDG = {}, --add ledges. this info is in the second (currently ignored) row
 	},
 	{--tileset 3 "viridian forest"
-		WALK = {4848}, --walkable
-		NWLK = {}, --nowalkable
+		WALK = {4848,3232,3252,5548}, --walkable
+		NWLK = {3521,2223,53,5448,1819,5151,4950}, --nowalkable
 		WARP = {}, --warp.
 		SHOP = {}, --shop here
 		TREE = {}, -- tree
@@ -94,7 +94,7 @@ TILE_DATA = {
 	{--tileset 4
 		WALK = {101}, --walkable
 		NWLK = {1616,0,5253,4849,2223,5455,5657,6058,5859,809,6162,3233,3839,
-				3941,3031,809,6347,2425}, --nowalkable
+				3941,3031,809,6347,2425,}, --nowalkable
 		WARP = {2627}, --warp. 2020 is doormat
 		TREE = {}, --tree
 		COMP = {5051}, --pc computer

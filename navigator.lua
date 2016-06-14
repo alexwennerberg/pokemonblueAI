@@ -14,7 +14,14 @@ function walk(direction)
       end
     elseif mem.menu_open() then
       interact_object()
-    end 
+    elseif mem.check_scripted_movement() then
+      while mem.check_scripted_movement() do
+        vba.frameadvance()
+      end
+      util.skipframes(10)
+    elseif mem.menu_open() then
+      interact_object()
+    end
     map.update_position()
 end
 
@@ -33,5 +40,6 @@ function interact_object()
       util.button("A")
       util.skipframes(100)
   end
+  util.skipframes(100)
 end
 

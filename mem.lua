@@ -8,6 +8,7 @@ local memory_names = {
 	----player
 	player_x_coord = 0xD362,
 	player_y_coord = 0xD361,
+  movement_scripted = 0xD730,--weird and maybe broken
   player_facing_direction = 0xC109,
 	player_move_direction = 0xD528,
 	movement_disabled = 0xCFC4,
@@ -32,6 +33,13 @@ local memory_names = {
   --game
   gym_badge_1 = 0xD356, --brock
 }
+
+function check_scripted_movement()
+  if value('movement_scripted') ~= 0 then
+    return true
+  end
+  return false
+end
 
 function get_menu_cursor_location()
   return value('menu_cursor_location')

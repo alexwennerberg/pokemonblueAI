@@ -83,6 +83,10 @@ function test()
 end
 
 function help_me_debug()
+  while 1 do
+    print(map.generate_tile_table())
+    util.skipframes(100)
+  end
 end
 
 main()
